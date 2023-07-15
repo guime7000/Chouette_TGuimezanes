@@ -1,6 +1,6 @@
 # Technical Case - Thomas Guimezanes
 
-This project gives you the configuration to start working on the technical case.
+This project gives you the configuration tnd API Documentation for the technical case.
 
 ## How to deploy :
 
