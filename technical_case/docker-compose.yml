@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+  postgis:
+    image: postgis/postgis
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_DB=django_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password_1234
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: django-gis-api:latest
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./gis_api:/home/docker_user/gis_api
+    environment:
+      - DATABASE_NAME=django_db
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=password_1234
+      - DATABASE_HOST=postgis
+      - DATABASE_PORT=5432
+    depends_on:
+      postgis:
+        condition: service_healthy
+    links:
+      - postgis
+    networks:
+      - default
+
+networks:
+  default:
+    external: false

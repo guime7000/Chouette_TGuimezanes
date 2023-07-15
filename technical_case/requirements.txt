@@ -1,0 +1,4 @@
+Django>=4.2.2
+djangorestframework>=3.10.3
+djangorestframework-gis>=0.14
+psycopg2>=2.9.6
