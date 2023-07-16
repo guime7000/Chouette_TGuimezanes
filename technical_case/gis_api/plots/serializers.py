@@ -1,10 +1,6 @@
 from rest_framework import serializers
 
 from .models import Plots
-from django.contrib.auth.models import User
-from django.contrib.gis.db import models
-from django.contrib.gis.geos import Polygon, GEOSGeometry
-from django.contrib.gis.db.models.functions import Area
 
 
 class CreatePlotsSerializer(serializers.ModelSerializer):

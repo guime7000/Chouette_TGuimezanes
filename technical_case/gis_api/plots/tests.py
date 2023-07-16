@@ -11,7 +11,7 @@ class CreatePlotTests(APITestCase):
 
     def test_create_plot(self):
         """
-        Ensure a plot is created with correct fields values in DB
+        Ensure a plot is created with correct fields values in postGIS DB
         """
         url = "/plots/"
         data = {
@@ -35,11 +35,12 @@ class CreatePlotTests(APITestCase):
 
     def test_create_plot_with_bad_geometry(self):
         """
-        Ensure Non parsable GEOSGeometry instructions are not allowed
+        Ensure non parsable GEOSGeometry instructions are not allowed
         """
         url = "/plots/"
         data = {
             "plot_name": "plot1",
+            # POLY instead of POLYGON
             "plot_geometry": "POLY ((0.0 0.0,  0.1 0, 0.1 0.1, 0.0 0.1, 0.0 0.0))",
             "plot_owner": "user1",
         }
@@ -82,7 +83,7 @@ class ListPlotsTests(APITestCase):
 
     def test_returned_plot_list_length(self):
         """
-        Ensure that plot list endpoints returns ALL plots of a specific user in DB
+        Ensure that plot list endpoints returns ALL plots in DB for a specific user
         """
         url = "/plots/user1"
 
@@ -173,7 +174,7 @@ class UpdateDeletePlotTests(APITestCase):
 
     def test_delete_plot_empties_plot_attribute_in_db(self):
         """
-        Ensure that deleting plot name with wrong password is impossible
+        Ensure that deleting a plot when authenticated is removing it from DB
         """
         url = "/plots/user2/6"
 

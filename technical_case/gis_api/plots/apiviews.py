@@ -1,9 +1,10 @@
-from rest_framework.views import APIView
-from rest_framework import generics, status
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+
+from rest_framework.views import APIView
+from rest_framework import generics, status
+from rest_framework.response import Response
 
 from .models import Plots
 from .serializers import (
@@ -16,10 +17,10 @@ from .serializers import (
 class PlotCreate(APIView):
     """
     /plots/
-    Endpoint for plots creation, specifying :
-    plot_name , plot_geometry, plot_owner
+    Endpoint for plot creation, specifying :
+    plot_name, plot_geometry, plot_owner
 
-    Polygon input Format : POLYGON ((-98.503358 29.335668, -98.503086 29.335668, -98.503086 29.335423, -98.50335800000001 29.335423, -98.503358 29.335668))')
+    Polygon input Format : POLYGON ((-98.503358 29.335668, -98.503086 29.335668, -98.503086 29.335423, -98.50335800000001 29.335423, -98.503358 29.335668))
 
     """
 
@@ -58,7 +59,7 @@ class PlotCreate(APIView):
 
 class PlotsListByUser(generics.ListAPIView):
     """
-    /plots/<username>/
+    /plots/<username>
 
     Endpoint to list all plots owned by user <username>
     """
@@ -89,7 +90,7 @@ class PlotUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
     /plots/<username>/<id>
 
     Endpoint to update (PATCH method) or DELETE a plot
-    Authentication is required so password must be provided in the request
+    Authentication is required so <username>'s password must be provided in the request
 
     """
 
