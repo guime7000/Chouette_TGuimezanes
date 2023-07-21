@@ -5,6 +5,12 @@ from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.authentication import (
+    SessionAuthentication,
+    BasicAuthentication,
+    TokenAuthentication,
+)
+from rest_framework.permissions import IsAuthenticated
 
 from .models import Plots
 from .serializers import (
@@ -94,6 +100,13 @@ class PlotUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
 
     """
 
+    authentication_classes = [
+        SessionAuthentication,
+        BasicAuthentication,
+        TokenAuthentication,
+    ]
+    permission_classes = [IsAuthenticated]
+
     serializer_class = UpdateDeletePlotsSerializer
     lookup_field = "id"
 
@@ -102,9 +115,6 @@ class PlotUpdateDelete(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         username = self.kwargs["username"]
         id = self.kwargs["id"]
-        password = self.request.data["password"]
 
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            login(self.request, user)
+        if self.request.user.is_authenticated:
             return Plots.objects.filter(plot_owner=username, id=id)
