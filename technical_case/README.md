@@ -145,9 +145,9 @@ Trying to list plots of an unknown user will lead to a **404_Not_found** http st
 - Http Return code : 200 OK
 ```
 
-To be allowed to update a plot, its owner must be authenticated using his password.
+To be allowed to update a plot, its owner must be authenticated using DRF TokenAuthentication.
 
-If authentication fails, API will return a 404_error_code
+If authentication fails, API will return a 403_forbidden.
 
 * To update a plot name, specify the new name of the plot in a "plot_name" field and send it with the password:
 
