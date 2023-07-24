@@ -20,7 +20,7 @@ from .serializers import (
 )
 
 
-class PlotCreate(APIView):
+class PlotCreate(generics.CreateAPIView):  # APIView
     """
     /plots/
     Endpoint for plot creation, specifying :

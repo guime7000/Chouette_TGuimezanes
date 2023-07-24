@@ -1,5 +1,7 @@
 from django.urls import path, re_path
 
+from rest_framework.authtoken import views
+
 from .apiviews import (
     PlotCreate,
     PlotsListByUser,
@@ -7,6 +9,7 @@ from .apiviews import (
 )
 
 urlpatterns = [
+    path("token_delivery/", views.obtain_auth_token, name="token_delivery"),
     path("plots/", PlotCreate.as_view(), name="plot_create"),
     re_path(
         "^plots/(?P<username>.+)/(?P<id>.+)",
