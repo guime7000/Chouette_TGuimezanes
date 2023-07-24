@@ -54,6 +54,10 @@ Using the 3 URLs below, you'll be able to :
 - **list** all plots owned by a specific user via ``http://localhost:8000/plots/<username>``
 - **update** or **delete** a plot via ``http://localhost:8000/plots/<username>/<id>``
 
+Update and Delete operations need Authentication. This is done using [https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication](DRF TokenAuthentication).
+
+Provide a {username, password} payload to /token_delivery/ endpoints and you'll get an authentication Token in return response.
+
 ### &rarr; Create a plot:
 ```
 - Endpoint: /plots/
@@ -77,7 +81,7 @@ For example:
 
 To create a new plot in database, you'll need to provide three key/values pairs. 
 - "plot_name": "ABCDE"
-- "plot_geometry": POLYGON((1 1, 0 50, 50 50, 50 0, 1 1))"
+- "plot_geometry": (1 1, 0 50, 50 50, 50 0, 1 1)"
 - "plot_owner": "user1"
 
 Type:
@@ -85,7 +89,7 @@ Type:
 ```bash
 curl -iX POST 
 -H "Content-Type: application/json" 
--d '{"plot_name": "ABCDE", "plot_geometry":"POLYGON ((1 1, 0 50, 50 50, 50 0, 1 1))", "plot_owner":"user1"}' 
+-d '{"plot_name": "ABCDE", "plot_geometry":"(1 1, 0 50, 50 50, 50 0, 1 1)", "plot_owner":"user1"}' 
 http://localhost:8000/plots/
 ```
 - which will create a plot named **ABCDE** with a **GEODjango Polygon** type object of coords **(1 1, 0 50, 50 50, 50 0, 1 1)** owned by **user1**
@@ -135,9 +139,8 @@ Trying to list plots of an unknown user will lead to a **404_Not_found** http st
 - Endpoint: /plots/<username>/<id>
 - Http method allowed: PATCH
 - data required: 
-
         - "plot_name" AND / OR "plot_geometry"
-        - "password"
+- header shall contain "Authorization: Token <userToken>"
     
 - Http Return code : 200 OK
 ```
@@ -151,7 +154,8 @@ If authentication fails, API will return a 404_error_code
 ```bash
 curl -iX PATCH 
 -H "Content-Type: application/json" 
--d '{"plot_name":"plot27", "password":"user_password"}' 
+-H "Authorization: Token <YOUR_USER_TOKEN>"
+-d '{"plot_name":"plot27"}' 
 http://localhost:8000/plots/user1/1
 ```
 returns 
@@ -167,7 +171,8 @@ and http status_code 200_OK
 ```bash
 curl -iX PATCH 
 -H "Content-Type: application/json" 
--d '{"plot_geometry":"POLYGON ((1 1, 0 100, 100 100, 100 0, 1 1))", "password":"user_password"}' 
+-H "Authorization: Token <YOUR_USER_TOKEN>"
+-d '{"plot_geometry":"POLYGON ((1 1, 0 100, 100 100, 100 0, 1 1))"}' 
 http://localhost:8000/plots/update/user1/1
 ```
 
@@ -188,9 +193,9 @@ Once authenticated, a plot owner is given the possibility to change the owner of
 
 ```bash
 curl -iX PATCH 
--H "Content-Type: application/json" 
--d '{"plot_owner":"user2", 
-"password":"user_password"}' 
+-H "Content-Type: application/json"
+-H "Authorization: Token <YOUR_USER_TOKEN>"
+-d '{"plot_owner":"user2"}' 
 http://localhost:8000/plots/update/user1/2
 ```
 will update ``plot_owner``fields attribute from ``user1`` to ``user2``
@@ -200,10 +205,11 @@ will update ``plot_owner``fields attribute from ``user1`` to ``user2``
 - Endpoint: /plots/<username>/<id>
 - Http method allowed: DELETE
 - data required: password
+- header shall contain "Authorization: Token <userToken>"
     
 - Http Return code : 204 No_Content
 ```
-As for updating a plot, the owner of a plot has to be authenticated using a ``password``field in the request to be allowed to delete one of its plot.
+As for updating a plot, the owner of a plot has to be authenticated.
 
 Assuming **user2** :
 
@@ -216,7 +222,7 @@ Then typing :
 ```bash
 curl -iX DELETE 
 -H "Content-Type: application/json" 
--d '{"password":"password_user2"}' 
+-H "Authorization: Token <YOUR_USER_TOKEN>"
 http://localhost:8000/plots/user2/2
 ```
 

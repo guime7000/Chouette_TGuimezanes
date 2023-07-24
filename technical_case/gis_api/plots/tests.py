@@ -1,10 +1,12 @@
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITestCase, APIClient
+from rest_framework.authtoken.models import Token
 from plots.models import Plots, User
 
 
 class CreatePlotTests(APITestCase):
     def setUp(self):
+        self.client = APIClient()
         self.user = User.objects.create(username="user1")
         self.user.set_password("password_1234")
         self.user.save()
@@ -16,12 +18,11 @@ class CreatePlotTests(APITestCase):
         url = "/plots/"
         data = {
             "plot_name": "plot1",
-            "plot_geometry": "POLYGON ((0.0 0.0,  0.1 0, 0.1 0.1, 0.0 0.1, 0.0 0.0))",
+            "plot_geometry": "(0.0 0.0,  0.1 0, 0.1 0.1, 0.0 0.1, 0.0 0.0)",
             "plot_owner": "user1",
         }
         response = self.client.post(url, data=data, format="json")
 
-        user = User.objects.filter(username="user1")
         createdPlot = Plots.objects.filter(id=1)[0]
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(createdPlot.plot_name, "plot1")
@@ -40,8 +41,7 @@ class CreatePlotTests(APITestCase):
         url = "/plots/"
         data = {
             "plot_name": "plot1",
-            # POLY instead of POLYGON
-            "plot_geometry": "POLY ((0.0 0.0,  0.1 0, 0.1 0.1, 0.0 0.1, 0.0 0.0))",
+            "plot_geometry": "(0.0 0.0,(0.1 0), 0.1 0.1, 0.0 0.1, 0.0 0.0)",
             "plot_owner": "user1",
         }
         response = self.client.post(url, data=data, format="json")
@@ -55,7 +55,7 @@ class CreatePlotTests(APITestCase):
         url = "/plots/"
         data = {
             "plot_name": "plot1",
-            "plot_geometry": "POLYGON ((0.0 0.0,  0.1 0, 0.1 0.1, 0.0 0.1, 0.0 0.0))",
+            "plot_geometry": "(0.0 0.0,  0.1 0, 0.1 0.1, 0.0 0.1, 0.0 0.0)",
             "plot_owner": "user",
         }
         response = self.client.post(url, data=data, format="json")
@@ -132,8 +132,15 @@ class UpdateDeletePlotTests(APITestCase):
         """
         url = "/plots/user1/1"
 
-        response = self.client.patch(url, {"password": "password"})
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.user2Token = self.client.post(
+            "/token_delivery/", data={"username": "user2", "password": "password_abcd"}
+        ).data["token"]
+
+        response = self.client.patch(
+            url,
+            HTTP_Authorization=f"Token {self.user2Token}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_update_plot_name_with_authenticated_user(self):
         """
@@ -146,15 +153,21 @@ class UpdateDeletePlotTests(APITestCase):
 
         url = f"/plots/user1/{first_plot_id}"
 
+        self.user1Token = self.client.post(
+            "/token_delivery/", data={"username": "user1", "password": "password_1234"}
+        ).data["token"]
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.user1Token)
+
         response = self.client.patch(
             url,
             data={
                 "plot_name": "plot100",
-                "password": "password_1234",
                 "plot_geometry": "POLYGON((0.0 0.0,  0.2 0.0, 0.2 0.2, 0.0 0.2, 0.0 0.0))",
             },
             format="json",
         )
+
         updatedPlot = Plots.objects.filter(id=first_plot_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(updatedPlot[0].plot_name, "plot100")
@@ -169,8 +182,16 @@ class UpdateDeletePlotTests(APITestCase):
         """
         url = "/plots/user2/6"
 
-        response = self.client.delete(url, {"password": "password"})
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.user2Token = self.client.post(
+            "/token_delivery/",
+            data={"username": "user2", "password": "password_abcd"},
+        ).data["token"]
+
+        response = self.client.delete(
+            url,
+            HTTP_Authorization=f"Token {self.user2Token}",
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_plot_empties_plot_attribute_in_db(self):
         """
@@ -180,7 +201,13 @@ class UpdateDeletePlotTests(APITestCase):
 
         original_plots_count = Plots.objects.count()
 
-        response = self.client.delete(url, {"password": "password_abcd"})
+        self.user1Token = self.client.post(
+            "/token_delivery/", data={"username": "user1", "password": "password_1234"}
+        ).data["token"]
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.user1Token)
+
+        response = self.client.delete(url)
 
         current_plots_count = Plots.objects.count()
 

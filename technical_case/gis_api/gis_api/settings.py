@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-rq5pksy_pg3fa+lfz3d^sg5km#jq2*__u#b=otrd8skk%%aw&t"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -107,6 +107,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# DRF settings
+#
+REST_FRAMEWORK = {
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "TEST_REQUEST_RENDERER_CLASSES": [
+        "rest_framework.renderers.MultiPartRenderer",
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.TemplateHTMLRenderer",
+    ],
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

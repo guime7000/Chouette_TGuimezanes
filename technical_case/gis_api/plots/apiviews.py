@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
+from django.contrib.gis.geos import GEOSGeometry
 
-from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.authentication import (
@@ -20,24 +19,25 @@ from .serializers import (
 )
 
 
-class PlotCreate(generics.CreateAPIView):  # APIView
+class PlotCreate(generics.CreateAPIView):
     """
     /plots/
     Endpoint for plot creation, specifying :
     plot_name, plot_geometry, plot_owner
 
-    Polygon input Format : POLYGON ((-98.503358 29.335668, -98.503086 29.335668, -98.503086 29.335423, -98.50335800000001 29.335423, -98.503358 29.335668))
+    Polygon input Format : (-98.503358 29.335668, -98.503086 29.335668, -98.503086 29.335423, -98.50335800000001 29.335423, -98.503358 29.335668)
 
     """
 
     serializer_class = CreatePlotsSerializer
 
     def post(self, request):
-        plot_name = request.data["plot_name"]
-        plot_geometry = request.data["plot_geometry"]
-        plot_owner = request.data["plot_owner"]
-
         try:
+            plot_name = request.data["plot_name"]
+            plot_owner = request.data["plot_owner"]
+            plot_geometry = GEOSGeometry(
+                "POLYGON (" + request.data["plot_geometry"] + ")"
+            )
             serializer = CreatePlotsSerializer(
                 data={
                     "plot_name": plot_name,
