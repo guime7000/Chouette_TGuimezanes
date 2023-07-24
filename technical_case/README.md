@@ -54,7 +54,7 @@ Using the 3 URLs below, you'll be able to :
 - **list** all plots owned by a specific user via ``http://localhost:8000/plots/<username>``
 - **update** or **delete** a plot via ``http://localhost:8000/plots/<username>/<id>``
 
-Update and Delete operations need Authentication. This is done using [https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication] (DRF TokenAuthentication).
+Update and Delete operations need Authentication. This is done using [DRF TokenAuthentication](https://www.django-rest-framework.org/api-guide/authentication/#tokenauthentication).
 
 Provide a {username, password} payload to /token_delivery/ endpoints and you'll get an authentication Token in return response.
 
