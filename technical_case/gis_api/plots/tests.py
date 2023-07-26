@@ -23,15 +23,23 @@ class CreatePlotTests(APITestCase):
         }
         response = self.client.post(url, data=data, format="json")
 
-        createdPlot = Plots.objects.filter(id=1)[0]
+        createdPlot = Plots.objects.filter(id=1)
+
+        createdPlotName = createdPlot.values("plot_name")[0]["plot_name"]
+        createdPlotGeometry = createdPlot.values("plot_geometry")[0]["plot_geometry"]
+        createdPlotOwner = createdPlot.values("plot_owner")[0]["plot_owner"]
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(createdPlot.plot_name, "plot1")
+        self.assertEqual(createdPlotName, "plot1")
         self.assertEqual(
-            createdPlot.plot_geometry,
+            createdPlotGeometry,
             "SRID=4326;POLYGON ((0.0 0.0,  0.1 0, 0.1 0.1, 0.0 0.1, 0.0 0.0))",
         )
         self.assertEqual(
-            User.objects.filter(username=createdPlot.plot_owner)[0].username, "user1"
+            User.objects.filter(username=createdPlotOwner).values("username")[0][
+                "username"
+            ],
+            "user1",
         )
 
     def test_create_plot_with_bad_geometry(self):
@@ -167,7 +175,6 @@ class UpdateDeletePlotTests(APITestCase):
             },
             format="json",
         )
-
         updatedPlot = Plots.objects.filter(id=first_plot_id)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(updatedPlot[0].plot_name, "plot100")

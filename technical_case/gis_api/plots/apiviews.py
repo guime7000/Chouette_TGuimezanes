@@ -31,37 +31,6 @@ class PlotCreate(generics.CreateAPIView):
 
     serializer_class = CreatePlotsSerializer
 
-    def post(self, request):
-        try:
-            plot_name = request.data["plot_name"]
-            plot_owner = request.data["plot_owner"]
-            plot_geometry = GEOSGeometry(
-                "POLYGON (" + request.data["plot_geometry"] + ")"
-            )
-            serializer = CreatePlotsSerializer(
-                data={
-                    "plot_name": plot_name,
-                    "plot_geometry": plot_geometry,
-                    "plot_owner": plot_owner,
-                }
-            )
-
-            if serializer.is_valid():
-                plot = serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-            else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except ValueError:
-            return Response(
-                data="Bad GEOSGeometry Input", status=status.HTTP_400_BAD_REQUEST
-            )
-        except Exception as e:
-            return Response(
-                data="GeosGeometry Error", status=status.HTTP_400_BAD_REQUEST
-            )
-
 
 class PlotsListByUser(generics.ListAPIView):
     """
